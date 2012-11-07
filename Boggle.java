@@ -3,49 +3,40 @@ import java.util.*;
 
 /**
  * Date: 14Oct12
+ * Last update: 06Nov12
  * Author: Cas Gentry
- * Description: Boggle.java, main class for word search game
  * 
- * Given the following grid:
- * A B C D E
- * F G H I J
- * K L M N O
- * P R S T U
- * V W X Y Z
+ * Generate a random board.
  * 
- * Write a program that prints a list of all the English words
- * that be found by starting at any letter and traversing to only
- * adjacent letters. Adjacent letters are defined as letters that
- * can be reached by going left, right, up, or down. For example:
- *   H I D E
- *   
- *   Questions: Can you hit a letter more than once? - Decided no
+ * Determine all the English words found by starting at any letter and 
+ * traversing to only adjacent letters. Adjacent letters are defined as
+ * letters that can be reached by going left, right, up, or down.
+ * 
+ * Let user pick words & check against list.
 **/
 
 public class Boggle{
-	//Dictionary index - TrieNodes build words, this references each tree
+	//holds the dictionary index
 	HashMap<Character, TrieNode> roots = new HashMap<Character, TrieNode>();
+	//array to hold the board
+	Tile[][] grid;
+	DisplayBoard display;
+	DisplayOptions menu;
+	final int N = 5; //static length of the board
+	LinkedList<String> foundWords;
 
-	Tile[][] grid;		//array to hold the board
-	final int N = 5; 	//static length of the board
-	LinkedList<String> foundWords; //LinkedList containing all words found on the board
-
-	//call the boggle class
 	public static void main(String[] args) { new Boggle(); }
 
 	public Boggle() {
-		//process the dictionary file
+		//process the dictionary
 		readFile("words.txt");
-		
-		//initialize found words list, it's empty right now
 		foundWords = new LinkedList<String>();
-		
-		//create a data structure to hold the board, an array of Tiles
-		//Tiles know their letter and if they've been visited
-		grid = new Tile[N][N];
 
-		//read in the board
-		readFile("board.txt");
+		//create a board
+		grid = randomBoard(N);
+		
+		display = new DisplayBoard(grid, N);
+		menu = new DisplayOptions();
 		
 		//display the board
 		System.out.println("-------------");
@@ -65,18 +56,31 @@ public class Boggle{
 			}
 		}
 		
-		//alphabetize the list of found words
 		Collections.sort(foundWords);
 		Iterator<String> it = foundWords.iterator();
-		
-		System.out.println("The following words can be found on this board:");
-		
-		int cols=0;
-		while(it.hasNext()){			
-			System.out.print(it.next()+"\t"); //iterate and print for the user
-			cols++;
-			if(cols>5){ System.out.println(); cols=0; } //display using columns
+		while(it.hasNext()){
+			System.out.println(it.next());
 		}
+	}
+	
+	//generate a random playing board
+	public Tile[][] randomBoard(int dimension){
+		Tile[][] board = new Tile[dimension][dimension];
+		Random generator = new Random();
+		String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		int alpha = 26, boardl = dimension * dimension;
+		int row = 0, col = 0;
+		while(boardl > 0){
+			int r = generator.nextInt(alpha);
+			char a = alphabet.charAt(r);
+			board[row][col] = new Tile(a);
+			alphabet = alphabet.replace(Character.toString(a), "");
+			col++;
+			if(col>=dimension){ col = 0; row++; }
+			alpha--; boardl--;
+		}
+		
+		return board;
 	}
 	
 	/* Read in a file with FileReader and Scanner and process */
@@ -88,31 +92,12 @@ public class Boggle{
         
         //create a scanner, get next line
         Scanner sc = new Scanner(fr);
-        int row = 0;
         //process each line
         while(sc.hasNext()){
         	String line = sc.nextLine();
-        	//tokenize the board and add words to the trie tree
-        	 //increment the row as you process
-        	if(filename.contains("board"))		{ row = processBoard(line, row); }
-        	else if(filename.contains("words")) { insert(line); }
+        	//add words to the trie tree 
+        	insert(line);
         }
-	}
-	
-	/* tokenize the board, split columns into board matrix */
-	public int processBoard(String line, int row){
-    	try{
-			StringTokenizer st = new StringTokenizer(line);
-			int col = 0;
-			while(st.hasMoreTokens()){
-				grid[row][col] = new Tile(st.nextToken().charAt(0));
-				//System.out.println("row: "+row+", col: "+col+", "+grid[row][col]);
-				col++;
-			}
-    	}
-    	catch(Exception e){ System.out.println("There might be a problem with input file format."); }
-
-    	return ++row;
 	}
 	
 	/* insert a word into the dictionary */
@@ -197,50 +182,46 @@ public class Boggle{
 			return; 
 		}
 		
-		//can't visit a cell more than once, return if it's already been visited
+		//can't visit a cell more than once, note if it's already been visited
 		if(grid[row][col].visited){
 			//System.out.println(prefix+" was already visited"); 
 			return; 
 		}
 
-		//we're about to check the word, tag the letter we're on as visited
 		grid[row][col].visited = true;
 		//System.out.println(grid[row][col].letter+" is visited.");
 		
-		//grab the root node, this corresponds to the first char in the string
+		//grab the root node in the string by the first char in the string
 		node = roots.get(prefix.charAt(0));
 		
 		//don't process for single letter words, articles not counted as words
 		if(prefix.length() > 1){
-			if(!existinTree(prefix, node)){ //if it doesn't exist in the tree
-				grid[row][col].visited = false; //reset this node as unvisited
+			if(!existinTree(prefix, node)){ 
+				grid[row][col].visited = false;
 				//System.out.println(prefix+" is not in tree."); 
 				//System.out.println(grid[row][col].letter+" is UNvisited.");
-				return; //back up a node
+				return; 
 			}
 			
-			//since it exists in the tree, check if it's a full word
 			if(isFullWord(prefix, node)){
 				if(!foundWords.contains(prefix)){
-					foundWords.add(prefix); //if it is, add to the foundWords list
+					foundWords.add(prefix);
 					//System.out.println(prefix);
 				}
 			}
 		}
 		
-		//consider neighboring letters on the board but not diagonals
+		//consider neighbors, not diagonals though
 		for(int a=-1; a <= 1; a++){
 			for(int b=-1; b <= 1; b++){
 				int nrow = row+a, ncol = col+b;
-				//don't consider increments that fall outside the board
-				//throw out diagonals by comparing absolute value of increments
 				if(nrow >= 0 && ncol >= 0 && nrow < N && ncol < N && Math.abs(a) != Math.abs(b)){
-					findWords(prefix, nrow, ncol); //recursive search for words
+					findWords(prefix, nrow, ncol);
 				}
 			}
 		}
 
-		grid[row][col].visited = false; //once this is complete, set this node back to unvisited
+		grid[row][col].visited = false;
 		//System.out.println(grid[row][col].letter+" is UNvisited.");
 	}
 }
