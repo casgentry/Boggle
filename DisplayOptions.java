@@ -1,5 +1,6 @@
+package BoggleGame;
+
 import java.awt.*;
-import java.awt.event.*;
 
 import javax.swing.*;
 
@@ -7,36 +8,37 @@ import javax.swing.*;
 **/
 
 @SuppressWarnings("serial")
-public class DisplayOptions extends JFrame implements ActionListener{
+public class DisplayOptions extends JPanel{
 	Button addWord;
-	JPanel userWords;
+	JTextField timer, score;
 	Boggle home;
 	
 	public DisplayOptions(){
-		super("Boggle");
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setLayout(new BorderLayout());
+		setLayout(new GridLayout(1,3));
+		setPreferredSize(new Dimension(235, 40));
 		setBackground(Color.gray);
-		setSize(new Dimension(100, 500));
-		setLocation(505, 0);
 		
 		addWord = new Button("Add Word");
-		addWord.addActionListener(this);
-		add(addWord, BorderLayout.NORTH);
+		add(addWord);
 		
-		userWords = new JPanel();
-		userWords.setSize(new Dimension(100,350));
-		userWords.setBackground(Color.white);
-		add(userWords);
+		timer = new JTextField("0:00");
+		timer.setEditable(false);
+		timer.setAlignmentX(CENTER_ALIGNMENT);
+		timer.setAlignmentY(CENTER_ALIGNMENT);
+		timer.setFont(new Font("SansSerif", Font.BOLD, 40));
+		timer.setBorder(BorderFactory.createLineBorder(Color.black));
+		timer.setBackground(Color.white);
+		add(timer);
+		
+		score = new JTextField("");
+		score.setEditable(false);
+		score.setAlignmentX(CENTER_ALIGNMENT);
+		score.setAlignmentY(CENTER_ALIGNMENT);
+		score.setFont(new Font("SansSerif", Font.BOLD, 40));
+		score.setBorder(BorderFactory.createLineBorder(Color.black));
+		score.setBackground(Color.LIGHT_GRAY);
+		add(score);
 		
 		setVisible(true);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource()==addWord){
-			System.out.println("Add a word!");
-			System.out.println(home.display.userWord);
-		}
 	}
 }

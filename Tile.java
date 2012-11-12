@@ -1,3 +1,5 @@
+package BoggleGame;
+
 import java.awt.*;
 import java.awt.font.*;
 import java.text.*;
@@ -12,14 +14,15 @@ import javax.swing.border.*;
 @SuppressWarnings("serial")
 public class Tile extends JPanel{
 	public char letter;
-	public boolean visited;
-	public boolean clicked;
+	public boolean visited, clicked, hover;
 	AttributedString print;
+	int rowLoc, colLoc;
 	
-	public Tile(char l){
+	public Tile(char l, int r, int c){
 		letter = l;
 		visited = false;
 		clicked = false;
+		rowLoc = r; colLoc = c;
         print = new AttributedString(""+letter);
         print.addAttribute(TextAttribute.SIZE, 50);
 		
@@ -32,8 +35,8 @@ public class Tile extends JPanel{
 	
 	public void paint(Graphics g){
 		super.paint(g);
-
-		if(clicked) {g.setColor(Color.yellow); System.out.println("Repaint:"+letter);}
+		if(hover) { g.setColor(Color.yellow); }
+		if(clicked) {g.setColor(Color.yellow); }
 		else		g.setColor(Color.white);
 		
 		g.fillRect(1, 1, 98, 98);

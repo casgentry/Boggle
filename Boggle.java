@@ -1,5 +1,10 @@
+package BoggleGame;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.*;
 
 /**
  * Date: 14Oct12
@@ -15,38 +20,75 @@ import java.util.*;
  * Let user pick words & check against list.
 **/
 
-public class Boggle{
+@SuppressWarnings("serial")
+public class Boggle extends JFrame implements ActionListener{
 	//holds the dictionary index
 	HashMap<Character, TrieNode> roots = new HashMap<Character, TrieNode>();
 	//array to hold the board
 	Tile[][] grid;
 	DisplayBoard display;
 	DisplayOptions menu;
+	DisplayWords list;
+	CountDown timer;
+	Button addWord;
 	final int N = 5; //static length of the board
 	LinkedList<String> foundWords;
+	LinkedList<String> userWords;
 
 	public static void main(String[] args) { new Boggle(); }
 
-	public Boggle() {
+	public Boggle(){
+		super("Boggle");
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setLayout(new GridBagLayout());
+		setBackground(Color.gray);
+		setSize(new Dimension(600, 600));
+		setResizable(false);
+		
 		//process the dictionary
 		readFile("words.txt");
 		foundWords = new LinkedList<String>();
 
 		//create a board
 		grid = randomBoard(N);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
 		
+		//create the boggle display
 		display = new DisplayBoard(grid, N);
-		menu = new DisplayOptions();
+		c.gridheight = 5;
+		c.gridwidth = 5;
+		c.weightx = 5.0;
+		c.weighty = 5.0;
+		c.ipadx = 300;
+		c.ipady = 300;
 		
-		//display the board
-		System.out.println("-------------");
-		for(int a=0; a<N; a++){
-			for(int b=0; b<N; b++){
-				System.out.print(grid[a][b].letter+" ");
-			}
-			System.out.println();
-		}
-		System.out.println("-------------");
+		add(display, c);
+
+		c.ipadx = 0;
+		c.ipady = 0;
+		
+ 		menu = new DisplayOptions();
+		menu.addWord.addActionListener(this);
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridwidth = 5;
+		
+		add(menu, c);
+		
+		list = new DisplayWords();
+		c.gridx = 5;
+		c.gridy = 0;
+		c.ipadx = 0;
+		c.gridheight = 6;
+		
+		add(list, c);
+
+		timer = new CountDown(menu, this);
+		
+		setVisible(true);
 		
 		//find all possible words in the boggle board
 		for(int i=0; i<N; i++){
@@ -61,6 +103,8 @@ public class Boggle{
 		while(it.hasNext()){
 			System.out.println(it.next());
 		}
+		
+		userWords = new LinkedList<String>();
 	}
 	
 	//generate a random playing board
@@ -73,7 +117,7 @@ public class Boggle{
 		while(boardl > 0){
 			int r = generator.nextInt(alpha);
 			char a = alphabet.charAt(r);
-			board[row][col] = new Tile(a);
+			board[row][col] = new Tile(a, row, col);
 			alphabet = alphabet.replace(Character.toString(a), "");
 			col++;
 			if(col>=dimension){ col = 0; row++; }
@@ -195,7 +239,7 @@ public class Boggle{
 		node = roots.get(prefix.charAt(0));
 		
 		//don't process for single letter words, articles not counted as words
-		if(prefix.length() > 1){
+		if(prefix.length() > 2){
 			if(!existinTree(prefix, node)){ 
 				grid[row][col].visited = false;
 				//System.out.println(prefix+" is not in tree."); 
@@ -224,4 +268,36 @@ public class Boggle{
 		grid[row][col].visited = false;
 		//System.out.println(grid[row][col].letter+" is UNvisited.");
 	}
+	
+	public void updateMenu(){
+		list.userWords.append(userWords.getLast()+"\n");
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource()==menu.addWord && display.play){
+			
+			if(foundWords.contains(display.userWord.toLowerCase())){
+				//add the word to the list, set to null
+				//System.out.println(display.userWord.toLowerCase());
+				userWords.addLast(display.userWord.toLowerCase()+"");
+				updateMenu();
+				list.repaint();
+			}
+			else{
+				JOptionPane.showMessageDialog(display, display.userWord+" is not a word.");
+			}
+
+			display.userWord = null;
+			display.click = false;
+			display.clearLetters();
+			
+			for(int i=0; i<N; i++){
+				for(int j=0; j<N; j++){
+					grid[i][j].repaint();
+				}
+			}
+		}
+	}
+
 }
