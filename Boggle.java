@@ -21,7 +21,7 @@ import javax.swing.*;
 **/
 
 @SuppressWarnings("serial")
-public class Boggle extends JFrame implements ActionListener{
+public class Boggle extends JFrame implements ActionListener, KeyListener{
 	//holds the dictionary index
 	HashMap<Character, TrieNode> roots = new HashMap<Character, TrieNode>();
 	//array to hold the board
@@ -79,6 +79,8 @@ public class Boggle extends JFrame implements ActionListener{
 		add(menu, c);
 		
 		list = new DisplayWords();
+		list.setFocusable(true);
+		list.addKeyListener(this);
 		c.gridx = 5;
 		c.gridy = 0;
 		c.ipadx = 0;
@@ -276,18 +278,31 @@ public class Boggle extends JFrame implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==menu.addWord && display.play){
-			
+			addWord();
+		}
+	}
+	
+	public void addWord(){
+		//all the words have been found
+		if(userWords.size() == foundWords.size()){
+			//stop the game
+		}
+		else{
 			if(foundWords.contains(display.userWord.toLowerCase())){
 				//add the word to the list, set to null
-				//System.out.println(display.userWord.toLowerCase());
-				userWords.addLast(display.userWord.toLowerCase()+"");
-				updateMenu();
-				list.repaint();
+				if(!userWords.contains(display.userWord.toLowerCase())){
+					userWords.addLast(display.userWord.toLowerCase()+"");
+					updateMenu();
+					list.repaint();
+				}
+				else{
+					JOptionPane.showMessageDialog(display, display.userWord+" was already found.");
+				}
 			}
 			else{
 				JOptionPane.showMessageDialog(display, display.userWord+" is not a word.");
 			}
-
+	
 			display.userWord = null;
 			display.click = false;
 			display.clearLetters();
@@ -299,5 +314,28 @@ public class Boggle extends JFrame implements ActionListener{
 			}
 		}
 	}
+
+	@Override
+	public void keyPressed(KeyEvent k) { 
+		char eventChar = k.getKeyChar();
+		for(int i=0; i<N; i++){
+			for(int j=0; j<5; j++){
+				if(grid[i][j].letter == Character.toUpperCase(eventChar)){
+					display.buildWord(i, j);
+				}
+			}
+		}
+		
+		int enter = k.getKeyCode();
+		if(enter == KeyEvent.VK_ENTER){
+			addWord();
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent k) { }
+
+	@Override
+	public void keyTyped(KeyEvent k) { }
 
 }
