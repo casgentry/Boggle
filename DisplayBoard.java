@@ -1,13 +1,13 @@
-package BoggleGame;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 
 /**
-**/
-
+ * Date: 14Oct12
+ * Author: Cas Gentry
+ **/
+ 
 @SuppressWarnings("serial")
 public class DisplayBoard extends JPanel implements MouseListener{
 	String userWord;

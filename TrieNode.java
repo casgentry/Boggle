@@ -1,5 +1,3 @@
-package BoggleGame;
-
 import java.util.*;
 
 /**

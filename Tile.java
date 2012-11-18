@@ -1,5 +1,3 @@
-package BoggleGame;
-
 import java.awt.*;
 import java.awt.font.*;
 import java.text.*;

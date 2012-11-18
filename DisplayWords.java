@@ -1,11 +1,10 @@
-package BoggleGame;
-
 import java.awt.*;
-
 import javax.swing.*;
 
 /**
-**/
+ * Date: 14Oct12
+ * Author: Cas Gentry
+ **/
 
 @SuppressWarnings("serial")
 public class DisplayWords extends JPanel{

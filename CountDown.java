@@ -1,5 +1,8 @@
-package BoggleGame;
-
+/**
+ * Date: 14Oct12
+ * Author: Cas Gentry
+ **/
+ 
 public class CountDown {
 	DisplayOptions menu;
 	Boggle home;
@@ -29,7 +32,7 @@ public class CountDown {
 		  try {
 			  Thread.sleep(3000);
 			  home.display.play = true;
-			  for(int i=threemin;i>=0;i--){
+			  for(int i=threemin;i>=0 && home.display.play;i--){
 				  //menu.timer.setText(""+i);
 				  String s;
 				  int min = i/60;
@@ -45,8 +48,16 @@ public class CountDown {
 				  menu.repaint();
 				  Thread.sleep(1000);
 			  }
-			  home.display.play = false;
+
+			  stopTimer();
+			  home.tallyPoints();
 		  } 
 		  catch(Exception exc) { System.out.println(exc); }
+	  }
+	  
+	  public void stopTimer(){
+		  home.display.play = false;
+		  menu.timer.setText("0:00");
+		  home.display.clearLetters();
 	  }
 }

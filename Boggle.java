@@ -1,5 +1,3 @@
-package BoggleGame;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -34,6 +32,7 @@ public class Boggle extends JFrame implements ActionListener, KeyListener{
 	final int N = 5; //static length of the board
 	LinkedList<String> foundWords;
 	LinkedList<String> userWords;
+	int score;
 
 	public static void main(String[] args) { new Boggle(); }
 
@@ -101,11 +100,12 @@ public class Boggle extends JFrame implements ActionListener, KeyListener{
 		}
 		
 		Collections.sort(foundWords);
+		/*
 		Iterator<String> it = foundWords.iterator();
 		while(it.hasNext()){
 			System.out.println(it.next());
 		}
-		
+		*/
 		userWords = new LinkedList<String>();
 	}
 	
@@ -286,6 +286,9 @@ public class Boggle extends JFrame implements ActionListener, KeyListener{
 		//all the words have been found
 		if(userWords.size() == foundWords.size()){
 			//stop the game
+			timer.stopTimer();
+			display.clearLetters();
+			tallyPoints();
 		}
 		else{
 			if(foundWords.contains(display.userWord.toLowerCase())){
@@ -313,6 +316,14 @@ public class Boggle extends JFrame implements ActionListener, KeyListener{
 				}
 			}
 		}
+		
+		//all the words have been found
+		if(userWords.size() == foundWords.size()){
+			//stop the game
+			timer.stopTimer();
+			display.clearLetters();
+			tallyPoints();
+		}
 	}
 
 	@Override
@@ -337,5 +348,23 @@ public class Boggle extends JFrame implements ActionListener, KeyListener{
 
 	@Override
 	public void keyTyped(KeyEvent k) { }
+	
+	public void tallyPoints(){
+		//score userWords
+		score = 0;
+		
+		Iterator<String> it = userWords.iterator();
+		while(it.hasNext()){
+			int wordL = it.next().length();
+			if(wordL < 4) score++;
+			else if(wordL < 5) score = score + 2; 
+			else if(wordL < 6) score = score + 3;
+			else if(wordL < 7) score = score + 5;
+			else if(wordL > 7) score = score + 11;
+		}
+		
+		//System.out.println(score);
+		JOptionPane.showMessageDialog(display, "Your score is "+score+".");
+	}
 
 }
